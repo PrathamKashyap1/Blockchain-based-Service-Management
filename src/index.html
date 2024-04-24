@@ -8,58 +8,119 @@
 <body>
     <h1><u>Welcome to Cloud Service Marketplace</u></h1>
     <div id="servicesList"></div>
-    <button onclick="addNewService()">Add New Service</button>
+    <button id="addServiceButton">Add New Service</button>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
     <script>
+        // Define a function to add a new service with the contract object as an argument
 
 
-async function addNewService() {
-                const name = prompt('Enter service name:');
-                const timeduration = prompt('Enter service duration (in seconds):');
-                const link = prompt('Enter service link:');
 
-                try {
-                    // Call the contract method to add a new service
-                    const services = await contract.methods.getAvailable().call();
-                    const result = await contract.methods.newService(services.length , name, timeduration,link).send({ from: web3.eth.defaultAccount });
-                    alert('Service added successfully!');
-                    // Reload the list of services after adding a new service
-                    fetchServices();
-                } catch (error) {
-                    console.error('Error adding new service:', error);
-                    alert('Error adding new service. Please try again later.');
+        function handleServiceClick(name, ownerAddress, availableTill,link) {
+
+                console.log(ownerAddress.toLowerCase()==="0x5ecc6fda203598bfc8a48274ac2965859acaed4f");
+                console.log('available   ',availableTill*1000);
+                console.log(Date.now());
+                // Check if the user is the owner and service is available
+                if ("0x5ecc6fda203598bfc8a48274ac2965859acaed4f".toLowerCase() === ownerAddress.toLowerCase() && Date.now() < availableTill * 1000) {
+                    window.open(`${link}`);
+                } else {
+                    alert('You do not have access to this service. Please buy it.');
                 }
             }
 
+            // Function to handle "Buy Service" button click
+            async function handleBuyClick(name, ownerAddress, availableTill) {
+                // Check if the service is available
+                if (Date.now() < availableTill ) {
+                    try {
+                        // Prompt the user to initialize the transaction to buy the service
+                        const result = await contract.methods.buyService().send({
+                            from: web3.eth.defaultAccount,
+                            value: web3.utils.toWei('0.001', 'ether')
+                        });
+                        alert('Service purchased successfully!');
+                        fetchServices(contract);
+                    } catch (error) {
+                        console.error('Error buying service:', error);
+                        alert('Error buying service. Please try again later.');
+                    }
+                } else {
+                    alert('This service is no longer available.');
+                }
+            }
+
+
+        async function fetchServices(contract) {
+
+const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+console.log('Accounts:',accounts[0]);
+const fromAddress = accounts[0];
+const servicesListElement = document.getElementById('servicesList');
+servicesListElement.innerHTML = ''; 
+const services = await contract.methods.getAvailable().call();
+services.forEach(service => {
+    const { id,name, ownerAddress,ser_timeduration, availableTill,isFree, serviceLink } = service;
+    if(name=="Text-Editor"){
+    console.log(typeof ownerAddress+"available");
+    console.log(typeof name+"name");
+    console.log(availableTill);
+    const listItem = document.createElement('div');
+    listItem.innerHTML = `
+<p>Service Name: ${name}</p>
+<p>Owner: ${ownerAddress}</p>
+<p>Available Till: ${new Date(Number(availableTill) * 1000)}</p>
+<button onclick="handleServiceClick('${name}', '${ownerAddress}', '${availableTill}', '${serviceLink}')">Open Service</button>
+<button onclick="handleBuyClick('${name}', '${ownerAddress}', '${availableTill}')">Buy Service</button>
+`;
+
+    servicesListElement.appendChild(listItem);
+}});
+}
+
+
+        async function handleAddServiceClick(contract) {
+    try {
+        // Ensure MetaMask is connected and the account is set
+        await window.ethereum.enable();
+
+        const name = prompt('Enter service name:');
+        const timeduration = parseInt(prompt('Enter service duration (in seconds):'));
+        const link = prompt("Enter service link name");
+        
+        let servicesList = await contract.methods.getAvailable().call();
+        let length = servicesList.length + 1;
+        
+        // Retrieve the current account from MetaMask
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        const fromAddress = accounts[0]; // Assuming the first account is used
+        
+        // Send the transaction with the from address specified
+        const result = await contract.methods.newService(length, name, timeduration, link).send({ from: fromAddress });
+        
+        alert('Service added successfully!');
+        
+        // Reload the list of services after adding a new service
+        fetchServices(contract);
+    } catch (error) {
+        console.error('Error adding new service:', error);
+        alert('Error adding new service. Please try again later.');
+    }
+}
+
+
         window.addEventListener('load', async () => {
+            // Connect to Web3 and initialize the contract
             if (window.ethereum) {
                 window.web3 = new Web3(window.ethereum);
-                await window.ethereum.enable();
             } else if (window.web3) {
                 window.web3 = new Web3(window.web3.currentProvider);
             } else {
                 console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
             }
 
-            
-            const contractAbi = 
-            
-            [
-	{
-		"inputs": [],
-		"name": "getAvailable",
-		"outputs": [
-			{
-				"internalType": "uint256[]",
-				"name": "",
-				"type": "uint256[]"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
+            const contractAbi = [
 	{
 		"inputs": [
 			{
@@ -99,6 +160,69 @@ async function addNewService() {
 		"name": "registerForService",
 		"outputs": [],
 		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_id",
+				"type": "uint256"
+			}
+		],
+		"name": "unregister",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getAvailable",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "serviceId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "address",
+						"name": "ownerAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "timeDuration",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "availableTill",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "isFree",
+						"type": "bool"
+					},
+					{
+						"internalType": "string",
+						"name": "serviceLink",
+						"type": "string"
+					}
+				],
+				"internalType": "struct Services.Service[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -149,84 +273,29 @@ async function addNewService() {
 		],
 		"stateMutability": "view",
 		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_id",
-				"type": "uint256"
-			}
-		],
-		"name": "unregister",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
 	}
+];
 
-
-            ];
-
+            const contractAddress = '0x5fFe734D4B652be0bbA0BABD98C2CB0D21F5f6Cf';
             
-            const contractAddress = '0xaCd7F11be4a8577d84AA396A05E46eb41e341b2E';
-
-            // Initialize the contract
+            
             const contract = new web3.eth.Contract(contractAbi, contractAddress);
 
-            // Fetch and display the list of available services
-            async function fetchServices() {
-                const servicesListElement = document.getElementById('servicesList');
-                servicesListElement.innerHTML = ''; // Clear existing list
+            
+            
 
-                const services = await contract.methods.getAvailable().call();
-                services.forEach(service => {
-                    const { name, owner, availableTill } = service;
-                    const listItem = document.createElement('div');
-                    listItem.innerHTML = `
-                        <p>Service Name: ${name}</p>
-                        <p>Owner: ${owner}</p>
-                        <p>Available Till: ${new Date(availableTill * 1000)}</p>
-                        <button onclick="handleServiceClick('${name}', '${owner}', ${availableTill})">Open Service</button>
-                        <button onclick="handleBuyClick('${name}', '${owner}', ${availableTill})">Buy Service</button>
-                    `;
-                    servicesListElement.appendChild(listItem);
-                });
-            }
+            
 
-            // Function to handle "Open Service" button click
-            function handleServiceClick(name, owner, availableTill) {
-                // Check if the user is the owner and service is available
-                if (web3.eth.defaultAccount.toLowerCase() === owner.toLowerCase() && Date.now() < availableTill * 1000) {
-                    
-                    window.open(`service_page.html?name=${name}&owner=${owner}`);
-                } else {
-                    alert('You do not have access to this service. Please buy it.');
-                }
-            }
+            // Get the button element
+            const addServiceButton = document.getElementById('addServiceButton');
 
-            // Function to handle "Buy Service" button click
-            async function handleBuyClick(name, owner, availableTill) {
-                // Check if the service is available
-                if (Date.now() < availableTill * 1000) {
-                    try {
-                        // Prompt the user to initialize the transaction to buy the service
-                        const result = await contract.methods.buyService().send({
-                            from: web3.eth.defaultAccount,
-                            value: web3.utils.toWei('0.001', 'ether')
-                        });
-                        alert('Service purchased successfully!');
-                        fetchServices();
-                    } catch (error) {
-                        console.error('Error buying service:', error);
-                        alert('Error buying service. Please try again later.');
-                    }
-                } else {
-                    alert('This service is no longer available.');
-                }
-            }
+            // Add click event listener to the button
+            addServiceButton.addEventListener('click', async () => {
+                handleAddServiceClick(contract);
+            });
 
-            // Fetch services when the page loads
-            fetchServices();
+            
+            fetchServices(contract);
         });
     </script>
 </body>
