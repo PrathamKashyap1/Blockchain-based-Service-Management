@@ -13,6 +13,26 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
     <script>
+
+
+async function addNewService() {
+                const name = prompt('Enter service name:');
+                const timeduration = prompt('Enter service duration (in seconds):');
+                const link = prompt('Enter service link:');
+
+                try {
+                    // Call the contract method to add a new service
+                    const services = await contract.methods.getAvailable().call();
+                    const result = await contract.methods.newService(services.length , name, timeduration,link).send({ from: web3.eth.defaultAccount });
+                    alert('Service added successfully!');
+                    // Reload the list of services after adding a new service
+                    fetchServices();
+                } catch (error) {
+                    console.error('Error adding new service:', error);
+                    alert('Error adding new service. Please try again later.');
+                }
+            }
+
         window.addEventListener('load', async () => {
             if (window.ethereum) {
                 window.web3 = new Web3(window.ethereum);
@@ -158,7 +178,7 @@
                 const servicesListElement = document.getElementById('servicesList');
                 servicesListElement.innerHTML = ''; // Clear existing list
 
-                const services = await contract.methods.getServices().call();
+                const services = await contract.methods.getAvailable().call();
                 services.forEach(service => {
                     const { name, owner, availableTill } = service;
                     const listItem = document.createElement('div');
@@ -195,7 +215,6 @@
                             value: web3.utils.toWei('0.001', 'ether')
                         });
                         alert('Service purchased successfully!');
-                        // Reload the list of services after purchase
                         fetchServices();
                     } catch (error) {
                         console.error('Error buying service:', error);
@@ -203,22 +222,6 @@
                     }
                 } else {
                     alert('This service is no longer available.');
-                }
-            }
-
-            // Function to add a new service
-            async function addNewService() {
-                const name = prompt('Enter service name:');
-                const timeduration = prompt('Enter service duration (in seconds):');
-                try {
-                    // Call the contract method to add a new service
-                    const result = await contract.methods.newService(name, timeduration).send({ from: web3.eth.defaultAccount });
-                    alert('Service added successfully!');
-                    // Reload the list of services after adding a new service
-                    fetchServices();
-                } catch (error) {
-                    console.error('Error adding new service:', error);
-                    alert('Error adding new service. Please try again later.');
                 }
             }
 

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Editing Service</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        p {
+            line-height: 1.6;
+            color: #666;
+        }
+        .editor {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 10px;
+            background-color: #fff;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Document Editing Service</h1>
+        <p>Welcome to our document editing service. Start creating and editing your documents below:</p>
+        <textarea class="editor" id="documentContent"></textarea>
+        <button class="btn" onclick="saveDocument()">Save Document</button>
+        <a class="btn" id="downloadLink" download="document.txt" style="display: none;">Download Document</a>
+    </div>
+
+    <script>
+        function saveDocument() {
+            var content = document.getElementById('documentContent').value;
+            var blob = new Blob([content], { type: 'text/plain' });
+            var url = window.URL.createObjectURL(blob);
+            var downloadLink = document.getElementById('downloadLink');
+            downloadLink.href = url;
+            downloadLink.style.display = 'inline-block';
+        }
+    </script>
+</body>
+</html>
