@@ -15,11 +15,12 @@ contract Services {
 
     mapping (uint => address) private serviceToUser;
 
-    function getAvailable() external view returns (uint[] memory) {
-        uint[] memory arr;
+    function getAvailable() external view returns (Service[] memory) {
+        Service[] memory arr = new Service[](10);
+        uint count = 0;
         for (uint i = 0; i < servicesList.length; i++) {
             if (servicesList[i].isFree) {
-                arr[i] = i;
+                arr[count++] = servicesList[i];
             }
         }
         return arr;
@@ -49,6 +50,8 @@ contract Services {
                 serviceToUser[_id] = address(0);
                 uint percentage = 1 - (availableTill - block.timestamp) / availableTill;
                 payable(msg.sender).transfer(percentage * 0.01 ether);
+                servicesList[i].isFree = true;
+                break;
             }
         }
     }

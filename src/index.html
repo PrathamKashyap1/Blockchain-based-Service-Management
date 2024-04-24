@@ -13,18 +13,16 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
     <script>
-        // Define a function to add a new service with the contract object as an argument
-
-
+        
 
         function handleServiceClick(name, ownerAddress, availableTill,link) {
 
                 console.log(ownerAddress.toLowerCase()==="0x5ecc6fda203598bfc8a48274ac2965859acaed4f");
-                console.log('available   ',availableTill*1000);
-                console.log(Date.now());
                 // Check if the user is the owner and service is available
-                if ("0x5ecc6fda203598bfc8a48274ac2965859acaed4f".toLowerCase() === ownerAddress.toLowerCase() && Date.now() < availableTill * 1000) {
-                    window.open(`${link}`);
+                if ("0x5ecc6fda203598bfc8a48274ac2965859acaed4f".toLowerCase() === ownerAddress.toLowerCase()) {
+                        if(name=="Text-Editor" || Date.now()<availableTill){
+                    window.open(`${link}`);}
+                    
                 } else {
                     alert('You do not have access to this service. Please buy it.');
                 }
@@ -52,32 +50,39 @@
             }
 
 
-        async function fetchServices(contract) {
+            async function fetchServices(contract) {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    console.log('Accounts:',accounts[0]);
+    const fromAddress = accounts[0];
+    const servicesListElement = document.getElementById('servicesList');
+    servicesListElement.innerHTML = ''; 
+    const services = await contract.methods.getAvailable().call();
+    services.forEach((service, index) => {
+        const { id, name, ownerAddress, ser_timeduration, availableTill, isFree, serviceLink } = service;
 
-const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-console.log('Accounts:',accounts[0]);
-const fromAddress = accounts[0];
-const servicesListElement = document.getElementById('servicesList');
-servicesListElement.innerHTML = ''; 
-const services = await contract.methods.getAvailable().call();
-services.forEach(service => {
-    const { id,name, ownerAddress,ser_timeduration, availableTill,isFree, serviceLink } = service;
-    if(name=="Text-Editor"){
-    console.log(typeof ownerAddress+"available");
-    console.log(typeof name+"name");
-    console.log(availableTill);
-    const listItem = document.createElement('div');
-    listItem.innerHTML = `
-<p>Service Name: ${name}</p>
-<p>Owner: ${ownerAddress}</p>
-<p>Available Till: ${new Date(Number(availableTill) * 1000)}</p>
-<button onclick="handleServiceClick('${name}', '${ownerAddress}', '${availableTill}', '${serviceLink}')">Open Service</button>
-<button onclick="handleBuyClick('${name}', '${ownerAddress}', '${availableTill}')">Buy Service</button>
-`;
-
-    servicesListElement.appendChild(listItem);
-}});
+        if(name=="Text-Editor"){
+            
+        const backgroundColor = `hsl(${index * 30}, 70%, 80%)`;
+        // Inline CSS to style each service as a card
+        const listItem = document.createElement('div');
+        listItem.style.backgroundColor = backgroundColor;
+        listItem.style.padding = '20px';
+        listItem.style.borderRadius = '10px';
+        listItem.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+        listItem.style.marginBottom = '20px';
+        listItem.innerHTML = `
+            <p style="font-size: 18px; font-weight: bold;">Service Name: ${name}</p>
+            <p style="font-size: 16px;">Owner: ${ownerAddress}</p>
+            <p style="font-size: 16px;">Available Till: ${new Date(Date.now() + 86400*1000)}</p>
+            <div style="display: flex; justify-content: space-between;">
+                <button style="padding: 10px 20px; font-size: 16px; background-color: #007bff; color: #fff; border: none; border-radius: 5px;" onclick="handleServiceClick('${name}', '${ownerAddress}', '${availableTill}', '${serviceLink}')">Open Service</button>
+                <button style="padding: 10px 20px; font-size: 16px; background-color: #28a745; color: #fff; border: none; border-radius: 5px;" onclick="handleBuyClick('${name}', '${ownerAddress}', '${availableTill}')">Buy Service</button>
+            </div>
+        `;
+        servicesListElement.appendChild(listItem);
+    }});
 }
+
 
 
         async function handleAddServiceClick(contract) {
@@ -87,6 +92,7 @@ services.forEach(service => {
 
         const name = prompt('Enter service name:');
         const timeduration = parseInt(prompt('Enter service duration (in seconds):'));
+        console.log("Time duration you entered is ", timeduration);
         const link = prompt("Enter service link name");
         
         let servicesList = await contract.methods.getAvailable().call();
