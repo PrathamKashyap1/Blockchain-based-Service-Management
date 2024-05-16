@@ -18,20 +18,23 @@
     <div id="servicesList"></div>
     <button id="addServiceButton">Add New Service</button>
 
+	
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
     <script>
         
 
+		
         function handleServiceClick(name, ownerAddress, availableTill,link) {
 
-                // Check if the user is the owner and service is available
+				console.log("entered");
                 if ("0x5ecc6fda203598bfc8a48274ac2965859acaed4f".toLowerCase() === ownerAddress.toLowerCase()) {
-                    
-                    const token = `name+${ownerAddress}`;
+					console.log("equals owner");
+                    //const token = `name+${ownerAddress}`;
                         if(name=="Text-Editor" || Date.now()<availableTill || true){
-                            console.log("Date "+Date.now() + " name "+name);
-                    window.open(`${link}`);}
+                            console.log("Date "+Date.now() + " name "+name+"avalialbel  "+availableTill);
+                    window.open(`${link}`);
+                }
                     
                 } else {
                     alert('You do not have access to this service. Please buy it.');
@@ -59,8 +62,14 @@
                 }
             }
 
+			async function unregister(id){
+			let unreg = await contract.methods.unregister(id).call();
+			console.log(unreg);
+			console.log("Unregistered");
+		}
 
-            async function fetchServices(contract) {
+
+            async function fetchServices(contract){
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     console.log('Accounts:',accounts[0]);
     const fromAddress = accounts[0];
@@ -68,31 +77,48 @@
     servicesListElement.innerHTML = ''; 
     const services = await contract.methods.getAvailable().call();
     services.forEach((service, index) => {
-        const { id, name, ownerAddress, ser_timeduration, availableTill, isFree, serviceLink } = service;
+        const { serviceid, name, ownerAddress, timeduration, availableTill, isFree, serviceLink } = service;
+		
 
         if(ownerAddress!=0x0000000000000000000000000000000000000000){
-            
+            let openbtn,buybtn;
+			if(ownerAddress.toLowerCase()==="0x5ecc6fda203598bfc8a48274ac2965859acaed4f"){
+				openbtn="inline-block";
+				buybtn="none";
+			}
+			else{
+				openbtn="none";
+				buybtn="inline-block";
+			}
         const backgroundColor = `hsl(${index * 30}, 70%, 80%)`;
+
+		console.log(name,ownerAddress,timeduration,serviceLink);
         
         const listItem = document.createElement('div');
-        listItem.style.backgroundColor = backgroundColor;
-        listItem.style.padding = '20px';
+        listItem.style.padding = '1px';
         listItem.style.borderRadius = '10px';
-        listItem.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+        // listItem.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
         listItem.style.marginBottom = '20px';
         listItem.innerHTML = `
-            <p style="font-size: 18px; font-weight: bold;">Service Name: ${name}</p>
-            <p style="font-size: 16px;">Owner: ${ownerAddress}</p>
-            <p style="font-size: 16px;">Available Till: ${new Date(Date.now() + 86400*1000)}</p>
-            <div style="display: flex; justify-content: space-between;">
-                <button style="padding: 10px 20px; font-size: 16px; background-color: #007bff; color: #fff; border: none; border-radius: 5px;" onclick="handleServiceClick('${name}', '${ownerAddress}', '${availableTill}', '${serviceLink}')">Open Service</button>
-                <button style="padding: 10px 20px; font-size: 16px; background-color: #28a745; color: #fff; border: none; border-radius: 5px;" onclick="handleBuyClick('${name}', '${ownerAddress}', '${availableTill}')">Buy Service</button>
-            </div>
+		<div class="card" style="width: 100%; max-width: 1400px; margin: 20px auto; background-color: ${backgroundColor}; border-radius: 10px; box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1); overflow: hidden;">
+    <div class="image" style="width: 40%; height: 230px; background-image: url('https://source.unsplash.com/featured/?gradient${name} papers'); background-size: cover; background-position: center; float: left;"></div>
+    <div class="content" style="padding: 20px; overflow: hidden;">
+        <h2 style="margin-top: 0;">Name: ${name}</h2>
+        <p>Owner : ${ownerAddress}</p>
+        <p>Booked Till:${Date(timeduration)}</p>
+        <div class="buttons" style="margin-top: 20px; text-align: right;">
+            <button class="buy-btn"  style="display :${buybtn};padding: 8px 16px; border: none; border-radius: 4px; margin-left: 10px; cursor: pointer; background-color: #007bff; color: #fff;">Buy Service</button>
+            <button class="open-btn" style=" display:${openbtn};padding: 8px 16px; border: none; border-radius: 4px; margin-left: 10px; cursor: pointer;background-color: #007bff; color: #fff;" onclick="handleServiceClick('${name}','${ownerAddress}','${timeduration}','${serviceLink}');">Open</button>
+            <button class="unregister-btn" style="display: ${openbtn}; padding: 8px 16px; border: none; border-radius: 4px; margin-left: 10px; cursor: pointer;background-color: #007bff; color: #fff;" onclick = "unregister(${serviceid});">Unregister</button>
+        </div>
+    </div>
+</div>
         `;
         servicesListElement.appendChild(listItem);
     }});
-}
 
+}
+		
 
 
         async function handleAddServiceClick(contract) {
@@ -110,7 +136,7 @@
         
         // Retrieve the current account from MetaMask
         const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        const fromAddress = accounts[0]; // Assuming the first account is used
+        const fromAddress = accounts[0];
         
         // Send the transaction with the from address specified
         const result = await contract.methods.newService(length, name, timeduration, link).send({ from: fromAddress });
@@ -126,6 +152,7 @@
 }
 
 
+
         window.addEventListener('load', async () => {
             // Connect to Web3 and initialize the contract
             if (window.ethereum) {
@@ -133,7 +160,7 @@
             } else if (window.web3) {
                 window.web3 = new Web3(window.web3.currentProvider);
             } else {
-                console.log('Non-Ethereum browser detected. You should consider trying MetaMask!');
+                alert('Non-Ethereum browser detected. You should consider trying MetaMask!');
             }
 
             const contractAbi = [
@@ -313,6 +340,8 @@
             
             fetchServices(contract);
         });
+
+		
     </script>
 </body>
 </html>

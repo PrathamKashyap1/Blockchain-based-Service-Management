@@ -8,7 +8,7 @@ contract Services {
         uint timeDuration;
         uint availableTill;
         bool isFree;
-        string serviceLink; // New field for service link
+        string serviceLink;
     }
 
     Service[] public servicesList;
