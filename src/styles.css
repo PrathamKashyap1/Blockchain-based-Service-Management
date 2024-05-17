@@ -1,0 +1,43 @@
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom right, #e4f65b, #02ff0f);
+    margin: 0;
+    padding: 0;
+}
+
+.highlight-btn {
+    background-color: transparent;
+    border: 2px solid #FFA500;
+    color: #FFA500;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.highlight-btn:hover {
+    background-color: #FFA500;
+    color: #fff;
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInFromLeft {
+    0% {
+        opacity: 0;
+        transform: translateX(-40%);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
