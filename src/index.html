@@ -11,19 +11,67 @@
             margin: 0;
             padding: 0;
         }
+
+		.highlight-btn {
+  background-color: transparent;
+  border: 2px solid #FFA500;
+  color: #FFA500;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.highlight-btn:hover {
+  background-color: #FFA500;
+  color: #fff;
+}
+
+@keyframes fadeInUp {
+			0% {
+				opacity: 0;
+				transform: translateY(20px);
+			}
+			100% {
+				opacity: 1;
+				transform: translateY(0);
+			}
+		}
+    @keyframes slideInFromLeft {
+        0% {
+            opacity: 0;
+            transform: translateX(-40%);
+        }
+        100% {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+
     </style>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+
 </head>
 <body>
-    <h1><u>Welcome to BlockServe - BlockChain Based Service management</u></h1>
-    <div id="servicesList"></div>
-    <button id="addServiceButton">Add New Service</button>
+    <div style="position: fixed; top: 0; width: 100%; background-color: #000; text-align: center; margin-bottom: 30px; animation: fadeInUp 1s;">
+		<h1 style="font-family: 'Poppins', sans-serif; font-size: 36px; font-weight: bold; color: #fff; margin: 0px 0;">BlockServe</h1>
+		<p style="font-family: 'Poppins', sans-serif; font-size: 18px; color: #fff; margin-bottom: 0;">A Smarter way to manage your services</p>
+	</div>
+	<br/>
+	<br/>
+	<br/>
+	<br/>
+	
+    <div id="servicesList" style="animation: slideInFromLeft 1.2s;"></div>
+	<button id="addServiceButton" type="button" class="highlight-btn">Add New Service</button>
 
 	
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
     <script>
         
-
+		var contract;
 		
         function handleServiceClick(name, ownerAddress, availableTill,link) {
 
@@ -46,7 +94,6 @@
                 // Check if the service is available
                 if (Date.now() < availableTill ) {
                     try {
-                        // Prompt the user to initialize the transaction to buy the service
                         const result = await contract.methods.buyService().send({
                             from: web3.eth.defaultAccount,
                             value: web3.utils.toWei('0.001', 'ether')
@@ -62,22 +109,20 @@
                 }
             }
 
-			async function unregister(id){
-			let unreg = await contract.methods.unregister(id).call();
-			console.log(unreg);
-			console.log("Unregistered");
-		}
+		
 
 
             async function fetchServices(contract){
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    console.log('Accounts:',accounts[0]);
+    console.log('Accounts:',accounts);
     const fromAddress = accounts[0];
     const servicesListElement = document.getElementById('servicesList');
     servicesListElement.innerHTML = ''; 
     const services = await contract.methods.getAvailable().call();
     services.forEach((service, index) => {
         const { serviceid, name, ownerAddress, timeduration, availableTill, isFree, serviceLink } = service;
+
+		console.log(serviceid);
 		
 
         if(ownerAddress!=0x0000000000000000000000000000000000000000){
@@ -90,10 +135,7 @@
 				openbtn="none";
 				buybtn="inline-block";
 			}
-        const backgroundColor = `hsl(${index * 30}, 70%, 80%)`;
-
-		console.log(name,ownerAddress,timeduration,serviceLink);
-        
+        const backgroundColor = `hsl(${index * 30}, 70%, 80%)`;				
         const listItem = document.createElement('div');
         listItem.style.padding = '1px';
         listItem.style.borderRadius = '10px';
@@ -101,7 +143,7 @@
         listItem.style.marginBottom = '20px';
         listItem.innerHTML = `
 		<div class="card" style="width: 100%; max-width: 1400px; margin: 20px auto; background-color: ${backgroundColor}; border-radius: 10px; box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1); overflow: hidden;">
-    <div class="image" style="width: 40%; height: 230px; background-image: url('https://source.unsplash.com/featured/?gradient${name} papers'); background-size: cover; background-position: center; float: left;"></div>
+    <div class="image" style="width: 40%; height: 230px; background-image: url('https://source.unsplash.com/featured/?${name}'); background-size: cover; background-position: center; float: left;"></div>
     <div class="content" style="padding: 20px; overflow: hidden;">
         <h2 style="margin-top: 0;">Name: ${name}</h2>
         <p>Owner : ${ownerAddress}</p>
@@ -109,7 +151,7 @@
         <div class="buttons" style="margin-top: 20px; text-align: right;">
             <button class="buy-btn"  style="display :${buybtn};padding: 8px 16px; border: none; border-radius: 4px; margin-left: 10px; cursor: pointer; background-color: #007bff; color: #fff;">Buy Service</button>
             <button class="open-btn" style=" display:${openbtn};padding: 8px 16px; border: none; border-radius: 4px; margin-left: 10px; cursor: pointer;background-color: #007bff; color: #fff;" onclick="handleServiceClick('${name}','${ownerAddress}','${timeduration}','${serviceLink}');">Open</button>
-            <button class="unregister-btn" style="display: ${openbtn}; padding: 8px 16px; border: none; border-radius: 4px; margin-left: 10px; cursor: pointer;background-color: #007bff; color: #fff;" onclick = "unregister(${serviceid});">Unregister</button>
+            <button class="unregister-btn" style="display: ${openbtn}; padding: 8px 16px; border: none; border-radius: 4px; margin-left: 10px; cursor: pointer;background-color: #007bff; color: #fff;" onclick = "unregister(1);">Unregister</button>
         </div>
     </div>
 </div>
@@ -322,7 +364,7 @@
             const contractAddress = '0x5fFe734D4B652be0bbA0BABD98C2CB0D21F5f6Cf';
             
             
-            const contract = new web3.eth.Contract(contractAbi, contractAddress);
+            contract = new web3.eth.Contract(contractAbi, contractAddress);
 
             
             
@@ -340,6 +382,13 @@
             
             fetchServices(contract);
         });
+
+
+		async function unregister(id){
+			let unreg = await contract.methods.unregister(id).call();
+			console.log(unreg);
+			console.log("Unregistered");
+		}
 
 		
     </script>
