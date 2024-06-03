@@ -48,7 +48,7 @@ const services = await contract.methods.getAvailable().call();
 services.forEach((service, index) => {
 const { serviceid, name, ownerAddress, timeduration, availableTill, isFree, serviceLink } = service;
 
-console.log(serviceid);
+console.log(services);
 
 
 if(ownerAddress!=0x0000000000000000000000000000000000000000){
@@ -68,8 +68,8 @@ listItem.style.borderRadius = '10px';
 // listItem.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
 listItem.style.marginBottom = '20px';
 listItem.innerHTML = `
-<div class="card" style="width: 100%; max-width: 1400px; margin: 20px auto; background-color: ${backgroundColor}; border-radius: 10px; box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1); overflow: hidden;">
-<div class="image" style="width: 40%; height: 230px; background-image: url('https://source.unsplash.com/featured/?${name}'); background-size: cover; background-position: center; float: left;"></div>
+<div class="card" style="width: 95%; max-width: 1400px; margin: 20px auto; background-color: ${backgroundColor}; border-radius: 10px; box-shadow: 1px 2px 3px black; overflow: hidden;">
+<div class="image" style="width: 40%; height:260px; background-image: url('https://source.unsplash.com/featured/?${name}'); background-size: cover; background-position: center; float: left;"></div>
 <div class="content" style="padding: 20px; overflow: hidden;">
 <h2 style="margin-top: 0;">Name: ${name}</h2>
 <p>Owner : ${ownerAddress}</p>
@@ -90,14 +90,20 @@ servicesListElement.appendChild(listItem);
 
 
 async function handleAddServiceClick(contract) {
+    if(!window.ethereum || !window.web3){
+        alert("You need to connect to metamask to add services.You can now access only free services");
+        }
 try {
 // Ensure MetaMask is connected and the account is set
 await window.ethereum.enable();
 
 const name = prompt('Enter service name:');
+if(name=="" ||  name==null){
+    alert("Please enter a valid name");
+    return;
+}
 const timeduration = parseInt(prompt('Enter service duration (in seconds):'));
-console.log("Time duration you entered is ", timeduration);
-const link = prompt("Enter service link name");
+const link = prompt("Enter your deployed service link/address");
 
 let servicesList = await contract.methods.getAvailable().call();
 let length = servicesList.length + 1;

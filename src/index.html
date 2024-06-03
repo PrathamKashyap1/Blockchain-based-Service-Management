@@ -5,20 +5,105 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlockChain based Service Management</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.3.5/dist/web3.min.js"></script>
+    <script src="contractinfo.js"></script>
+    <script src="scripts.js"></script>
 </head>
 <body>
-    <div style="position: fixed; top: 0; width: 100%; background-color: #000; text-align: center; margin-bottom: 30px; animation: fadeInUp 1s;">
-		<h1 style="font-family: 'Poppins', sans-serif; font-size: 36px; font-weight: bold; color: #fff; margin: 0px 0;">BlockServe</h1>
-		<p style="font-family: 'Poppins', sans-serif; font-size: 18px; color: #fff; margin-bottom: 0;">A Smarter way to manage your services</p>
-	</div>
-	<br/>
-	<br/>
-	<br/>
-	<br/>
-    
+	<script src="https://cdn.jsdelivr.net/npm/aos@2.3.1/dist/aos.js"></script>
+<script>
+    AOS.init({
+        duration: 1200,
+    });
+    </script>
+
+    <header id="header">
+        <div class="container">
+            <div class="logo">
+                <img src="images/logomain.png" alt="Logo">
+                <h1>BlockManage</h1>
+            </div>
+            <nav>
+                <input type="checkbox" id="check">
+        <label for="check" class="checkbtn">
+            <i class="fas fa-bars"></i>
+        </label>
+                <ul style="display: flex; align-items: center; justify-content: space-between">
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><div class="social" style="margin-right: 30px;">
+                        <a href="https://in.linkedin.com/in/pratham-kashyap-rampelly-376272281?trk=public_profile_browsemap&original_referer=https%3A%2F%2Fwww.google.com%2F" target="_blank">
+                            <img src="https://cdn1.iconfinder.com/data/icons/logotypes/32/circle-linkedin-512.png" alt="Linkedin" style="width: 50px;height: 50px;">
+                        </a>
+                    </div></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main style="padding-top: 220px; text-align: center;">
+        
+        <h1>One stop solution for your promoting your apps.</h1>
+        <p>Effortless Service Management Powered by Blockchain Brilliance!</p>
+        <a href="#services"><button class="get-started-btn">✨Get Started</button></a>
+    </main>
+
+    <section class="features" id="features">
+        <div class="container">
+            <h2>What makes us special</h2>
+            <div class="service-cards">
+                <div class="card" data-aos="fade-up">
+                    <i class="fas fa-cogs"></i>
+                    <h3>Smart Contract Development</h3>
+                    <p>We develop robust smart contracts tailored to your business needs.</p>
+                </div>
+                <div class="card" data-aos="fade-up" data-aos-delay="100">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Security Audits</h3>
+                    <p>Comprehensive security audits to ensure your contracts are safe and reliable.</p>
+                </div>
+                <div class="card" data-aos="fade-up" data-aos-delay="200">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Performance Optimization</h3>
+                    <p>Optimize your blockchain solutions for maximum performance and efficiency.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="services" style="padding-top: 80px; text-align: center;">  <h2>Our Services</h2></div>
     <div id="servicesList" style="animation: slideInFromLeft 1.2s;"></div>
     <button id="addServiceButton" class="highlight-btn">Add New Service</button>
-    <script src="https://cdn.jsdelivr.net/npm/web3@1.3.5/dist/web3.min.js"></script>
-    <script src="scripts.js"></script>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 BlockManage. All rights reserved.</p>
+            
+        </div>
+    </footer>
+
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+    
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        document.querySelector('.checkbtn').addEventListener('click', function() {
+            const checkbox = document.getElementById('check');
+            const navUl = document.querySelector('header nav ul');
+
+            if (checkbox.checked) {
+                navUl.classList.add('show');
+            } else {
+                navUl.classList.remove('show');
+            }
+        });
+    </script>
 </body>
 </html>
