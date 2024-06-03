@@ -1,5 +1,5 @@
 window.addEventListener('load', function() {
-    window.web3 = new Web3(web3.currentProvider);
+    
 const contractAbi = [
     {
     "inputs": [
@@ -156,9 +156,6 @@ const contractAbi = [
     }
     ];
     
-        const contractAddress = '0x5fFe734D4B652be0bbA0BABD98C2CB0D21F5f6Cf';
+    const contractAddress = '0x5fFe734D4B652be0bbA0BABD98C2CB0D21F5f6Cf';
         
-     var contract = new web3.eth.Contract(contractAbi, contractAddress); 
-
-     console.log(contract);
 });   

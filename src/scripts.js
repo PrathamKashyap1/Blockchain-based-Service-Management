@@ -39,12 +39,10 @@ function handleServiceClick(name, ownerAddress, availableTill,link) {
 
 
     async function fetchServices(contract){
-const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-console.log('Accounts:',accounts);
-const fromAddress = accounts[0];
+
 const servicesListElement = document.getElementById('servicesList');
 servicesListElement.innerHTML = ''; 
-const services = await contract.methods.getAvailable().call();
+const services = await contract.getAvailable();
 services.forEach((service, index) => {
 const { serviceid, name, ownerAddress, timeduration, availableTill, isFree, serviceLink } = service;
 
@@ -92,6 +90,7 @@ servicesListElement.appendChild(listItem);
 async function handleAddServiceClick(contract) {
     if(!window.ethereum || !window.web3){
         alert("You need to connect to metamask to add services.You can now access only free services");
+        return;
         }
 try {
 // Ensure MetaMask is connected and the account is set
@@ -105,19 +104,16 @@ if(name=="" ||  name==null){
 const timeduration = parseInt(prompt('Enter service duration (in seconds):'));
 const link = prompt("Enter your deployed service link/address");
 
-let servicesList = await contract.methods.getAvailable().call();
+let servicesList = await contract.getAvailable();
 let length = servicesList.length + 1;
 
 // Retrieve the current account from MetaMask
 const accounts = await window.ethereum.request({ method: 'eth_accounts' });
 const fromAddress = accounts[0];
-
-// Send the transaction with the from address specified
-const result = await contract.methods.newService(length, name, timeduration, link).send({ from: fromAddress });
+const contractwithsigner = contract.connect(signer);
+const result = await contractwithsigner.newService(length, name, timeduration, link);
 
 alert('Service added successfully!');
-
-// Reload the list of services after adding a new service
 fetchServices(contract);
 } catch (error) {
 console.error('Error adding new service:', error);
@@ -126,78 +122,125 @@ alert('Error adding new service. Please try again later.');
 }
 
 
-
 window.addEventListener('load', async () => {
-    // Connect to Web3 and initialize the contract
-    if (window.ethereum) {
-        window.web3 = new Web3(window.ethereum);
-    } else if (window.web3) {
-        window.web3 = new Web3(window.web3.currentProvider);
-    } else {
-        alert('Non-Ethereum browser detected. You should consider trying MetaMask!');
-    }
+    
+    let contract,signer;
 
     const contractAbi = [
-{
-"inputs": [
-    {
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-    },
-    {
-        "internalType": "string",
-        "name": "name",
-        "type": "string"
-    },
-    {
-        "internalType": "uint256",
-        "name": "timeDuration",
-        "type": "uint256"
-    },
-    {
-        "internalType": "string",
-        "name": "serviceLink",
-        "type": "string"
-    }
-],
-"name": "newService",
-"outputs": [],
-"stateMutability": "nonpayable",
-"type": "function"
-},
-{
-"inputs": [
-    {
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
-    }
-],
-"name": "registerForService",
-"outputs": [],
-"stateMutability": "payable",
-"type": "function"
-},
-{
-"inputs": [
-    {
-        "internalType": "uint256",
-        "name": "_id",
-        "type": "uint256"
-    }
-],
-"name": "unregister",
-"outputs": [],
-"stateMutability": "nonpayable",
-"type": "function"
-},
-{
-"inputs": [],
-"name": "getAvailable",
-"outputs": [
-    {
-        "components": [
+        {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "id",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+            },
+            {
+                "internalType": "uint256",
+                "name": "timeDuration",
+                "type": "uint256"
+            },
+            {
+                "internalType": "string",
+                "name": "serviceLink",
+                "type": "string"
+            }
+        ],
+        "name": "newService",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+        },
+        {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_id",
+                "type": "uint256"
+            }
+        ],
+        "name": "registerForService",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+        },
+        {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_id",
+                "type": "uint256"
+            }
+        ],
+        "name": "unregister",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+        },
+        {
+        "inputs": [],
+        "name": "getAvailable",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "serviceId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "ownerAddress",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "timeDuration",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "availableTill",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bool",
+                        "name": "isFree",
+                        "type": "bool"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "serviceLink",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct Services.Service[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+        },
+        {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "name": "servicesList",
+        "outputs": [
             {
                 "internalType": "uint256",
                 "name": "serviceId",
@@ -234,81 +277,36 @@ window.addEventListener('load', async () => {
                 "type": "string"
             }
         ],
-        "internalType": "struct Services.Service[]",
-        "name": "",
-        "type": "tuple[]"
-    }
-],
-"stateMutability": "view",
-"type": "function"
-},
-{
-"inputs": [
-    {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-    }
-],
-"name": "servicesList",
-"outputs": [
-    {
-        "internalType": "uint256",
-        "name": "serviceId",
-        "type": "uint256"
-    },
-    {
-        "internalType": "string",
-        "name": "name",
-        "type": "string"
-    },
-    {
-        "internalType": "address",
-        "name": "ownerAddress",
-        "type": "address"
-    },
-    {
-        "internalType": "uint256",
-        "name": "timeDuration",
-        "type": "uint256"
-    },
-    {
-        "internalType": "uint256",
-        "name": "availableTill",
-        "type": "uint256"
-    },
-    {
-        "internalType": "bool",
-        "name": "isFree",
-        "type": "bool"
-    },
-    {
-        "internalType": "string",
-        "name": "serviceLink",
-        "type": "string"
-    }
-],
-"stateMutability": "view",
-"type": "function"
-}
-];
+        "stateMutability": "view",
+        "type": "function"
+        }
+        ];
+        
+        const contractAddress = '0x5fFe734D4B652be0bbA0BABD98C2CB0D21F5f6Cf';
 
-    const contractAddress = '0x5fFe734D4B652be0bbA0BABD98C2CB0D21F5f6Cf';
-    
-    
-    contract = new web3.eth.Contract(contractAbi, contractAddress);
+        
+    if (window.ethereum) {
+        const provider = new ethers.providers.Web3Provider(window.ethereum)
+        await provider.send("eth_requestAccounts", []);
+        signer = provider.getSigner();
+        contract = new ethers.Contract(contractAddress, contractAbi, signer);
 
-    
-    
+    } else if (window.web3) {
+        const provider = new ethers.providers.Web3Provider(window.web3.currentProvider);
+        signer = provider.getSigner();
+        contract = new ethers.Contract(contractAddress,contractAbi,signer);
+    } else {
+        alert('Consider trying metamask to utilize all services.');
+        const provider = ethers.getDefaultProvider('https://sepolia.infura.io/v3/61362965c30a462398f4c664a266d13c');
+        contract = new ethers.Contract(contractAddress, contractAbi, provider);
+    }
 
-    
 
     // Get the button element
     const addServiceButton = document.getElementById('addServiceButton');
 
-    // Add click event listener to the button
     addServiceButton.addEventListener('click', async () => {
-        handleAddServiceClick(contract);
+        handleAddServiceClick(contract,signer);
     });
 
     
