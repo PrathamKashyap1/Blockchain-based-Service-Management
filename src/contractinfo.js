@@ -1,6 +1,5 @@
-window.addEventListener('load', function() {
-    
-const contractAbi = [
+   
+export const contractAbi = [
     {
     "inputs": [
         {
@@ -156,6 +155,5 @@ const contractAbi = [
     }
     ];
     
-    const contractAddress = '0x5fFe734D4B652be0bbA0BABD98C2CB0D21F5f6Cf';
-        
-});   
+    export const contractAddress = '0x5fFe734D4B652be0bbA0BABD98C2CB0D21F5f6Cf';
+   

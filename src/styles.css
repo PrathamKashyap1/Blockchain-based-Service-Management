@@ -151,6 +151,39 @@ footer {
     color: #fff;
 }
 
+.toggle-button-container {
+    text-align: center;
+}
+
+.toggle-button {
+    display: none;
+}
+
+.toggle-button + label {
+    background-color: transparent;
+    border: 2px solid #FFA500;
+    color: #FFA500;
+    padding: 10px 20px;
+    padding-left:23px;
+    font-size: 24px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.toggle-button + label i {
+    margin-right: 5px;
+}
+
+.toggle-button:checked + label {
+    background-color: #FFA500;
+    color: #fff;
+}
+
+
+
 @keyframes fadeInUp {
     0% {
         opacity: 0;
