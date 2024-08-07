@@ -11,6 +11,29 @@
             cursor: crosshair;
         }
 
+        /* Styles for the controls */
+        #controls {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-button {
+            margin: 0 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        #colorPicker, #sizePicker {
+            margin: 0 5px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            padding: 5px;
+        }
+
         /* Styles for the access denied message */
         #accessDenied {
             display: none;
@@ -22,7 +45,13 @@
     </style>
 </head>
 <body>
-    <canvas id="canvas" width="800" height="600"></canvas>
+    <canvas id="canvas" width="500" height="400"></canvas>
+    <div id="controls">
+        <input type="color" id="colorPicker" value="#000000">
+        <input type="range" id="sizePicker" min="1" max="10" value="2" title="Brush Size">
+        <button class="control-button" id="eraser">Eraser</button>
+        <button class="control-button" id="download">Download</button>
+    </div>
     <h1 id="accessDenied" style="font-size: 100px;">Access Denied</h1>
 
     <script>
@@ -43,11 +72,15 @@
             let isDrawing = false;
             let lastX = 0;
             let lastY = 0;
+            let strokeColor = '#000'; // Default color
+            let lineWidth = 2; // Default brush size
+            let isErasing = false;
 
             function draw(e) {
                 if (!isDrawing) return;
-                context.strokeStyle = '#000'; // Set the drawing color
-                context.lineWidth = 2; // Set the line width
+
+                context.strokeStyle = isErasing ? '#fff' : strokeColor; // Set the drawing color or eraser
+                context.lineWidth = lineWidth; // Set the line width
                 context.lineCap = 'round'; // Set the line cap style
 
                 context.beginPath();
@@ -66,6 +99,30 @@
             canvas.addEventListener('mousemove', draw);
             canvas.addEventListener('mouseup', () => isDrawing = false);
             canvas.addEventListener('mouseout', () => isDrawing = false);
+
+            // Color picker event listener
+            document.getElementById('colorPicker').addEventListener('change', (e) => {
+                strokeColor = e.target.value;
+                isErasing = false;
+            });
+
+            // Size picker event listener
+            document.getElementById('sizePicker').addEventListener('input', (e) => {
+                lineWidth = e.target.value;
+            });
+
+            // Eraser button event listener
+            document.getElementById('eraser').addEventListener('click', () => {
+                isErasing = true;
+            });
+
+            // Download button event listener
+            document.getElementById('download').addEventListener('click', () => {
+                const link = document.createElement('a');
+                link.download = 'drawing.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
 
         } else {
             // Token is invalid or missing, display the access denied message
