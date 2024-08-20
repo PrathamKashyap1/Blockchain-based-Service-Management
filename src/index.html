@@ -44,6 +44,33 @@
         </div>
     </header>
 
+
+
+
+
+    <div id="popup" class="popup">
+        <span id="closePopup" class="close">&times;</span>
+        <p id="textToCopy">window.addEventListener('load',()=>{
+            let p = new URLSearchParams(window.location.search);
+    
+            try{
+            let recd = JSON.parse(atob(p.get('data')));
+            if(recd.val > Date.now()){
+                console.log("verified");
+            }
+            else{
+                document.writeln("<h1>ERROR</h1>");
+            }
+        }
+        catch(error){
+            document.writeln("<h1 style='color:red; text-shadow:0 0 black;'> Can't Access link directly. Get redirected from BlockServe.");
+        }
+        });
+    </p>
+        <button id="copyButton">Copy to Clipboard</button>
+    </div>
+
+
     <main style="padding-top: 220px; text-align: center;">
         
         <h1>One stop solution for your promoting your apps.</h1>

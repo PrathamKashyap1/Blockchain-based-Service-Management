@@ -5,8 +5,9 @@ async function handleServiceClick(rentowner,rentedTill, serviceLink) {
     const accounts = await window.ethereum.request({ method: 'eth_accounts' });
     const msgsender = accounts[0];
     if(rentedTill > Date.now() && rentowner.toLowerCase() == msgsender.toLowerCase()){
-    let timelimit = btoa('temp');//finish this
-    window.open(serviceLink+"?data="+timelimit);
+    let encdata = btoa(JSON.stringify({val : Date.now() + 1000*60*60*3}));
+        // Open Page 2 in a new window
+    window.open(serviceLink+"?data="+encdata);
     }
 
 }
@@ -153,6 +154,12 @@ async function handleAddServiceClick(contract) {
         console.log(timeDuration);
         const isFreeservice = confirm("Click Ok if you want your service to be Freely Usable by all or click cancel if you want to charge each user of your service?");
 
+
+        if(!isFreeservice){
+            alert("Copy the following code and paste it in your service script so that users can access site from only our gateway");
+            document.getElementById('popup').classList.add('show');
+        }
+
         const link = prompt("Enter your deployed service link/address");
 
         const desc = prompt("Describe your service in a sentence or two?");
@@ -161,6 +168,7 @@ async function handleAddServiceClick(contract) {
             alert("No field should be empty");
             return;
         }
+
         const accounts = await window.ethereum.request({ method: 'eth_accounts' });
         const fromAddress = accounts[0];
         //calling add service function with new signer
@@ -214,6 +222,20 @@ function handleUpvoteClick(checkbox, counterId, serviceName,upvotecount) {
     }
 }
 
+
+document.getElementById('closePopup').addEventListener('click', function() {
+    document.getElementById('popup').classList.remove('show');
+});
+
+document.getElementById('copyButton').addEventListener('click', function() {
+    const text = document.getElementById('textToCopy').textContent;
+    navigator.clipboard.writeText(text).then(function() {
+        alert('Text copied to clipboard!');
+    }, function(err) {
+        alert('Failed to copy text: ' + err);
+    });
+    document.getElementById('popup').classList.remove('show');
+});
 
 
 
