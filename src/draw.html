@@ -61,10 +61,10 @@
             return urlParams.get(name);
         }
 
-        const token = getQueryParam('token');
-        const validToken = '0x5ecc6fda203598bfc8a48274ac2965859acaed4f';
-
-        if (token === validToken) {
+        let p = new URLSearchParams(window.location.search);
+    
+            let recd = JSON.parse(atob(p.get('data')));
+            if(recd.val > Date.now()){
             
             const canvas = document.getElementById('canvas');
             const context = canvas.getContext('2d');
